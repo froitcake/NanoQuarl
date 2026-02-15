@@ -1,5 +1,8 @@
 from typing import Any, Callable, Dict, List, Set, Tuple
 
+import sys
+sys.path.insert(0, '../..')
+
 import quartz  # type: ignore
 
 """global vars"""
