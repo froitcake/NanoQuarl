@@ -10,7 +10,10 @@ import threading
 from typing import Any, Dict, List, Tuple
 
 import dgl  # type: ignore
-import qtz
+import quartz_wrapper as qtz
+import sys
+sys.path.insert(0, '../..')
+import quartz  # type: ignore
 import torch
 import torch.distributed as dist
 import torch.distributed.rpc as rpc
@@ -25,8 +28,6 @@ from omegaconf.dictconfig import DictConfig
 from torch.distributions import Categorical
 from torch.futures import Future
 from utils import *
-
-# import quartz # type: ignore
 
 
 class Observer:
