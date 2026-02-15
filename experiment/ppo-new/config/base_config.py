@@ -138,7 +138,8 @@ class BaseConfig:
 
 @dataclass
 class TestConfig(BaseConfig):
-    wandb: WandbConfig = field(default_factory=lambda: WandbConfig(en=False))    topk: int = 3
+    wandb: WandbConfig = field(default_factory=lambda: WandbConfig(en=False))    
+    topk: int = 3
     mode: str = 'test'
     resume: bool = True
     budget: int = int(1e8)
@@ -151,7 +152,8 @@ class TestConfig(BaseConfig):
 
 @dataclass
 class ConvertConfig(BaseConfig):
-    wandb: WandbConfig = field(default_factory=lambda: WandbConfig(en=False))    mode: str = 'convert'
+    wandb: WandbConfig = field(default_factory=lambda: WandbConfig(en=False))    
+    mode: str = 'convert'
     resume: bool = True
     ckpt_output_dir: str = '.'
     ckpt_output_path: str = ''
