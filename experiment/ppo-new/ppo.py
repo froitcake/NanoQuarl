@@ -27,7 +27,7 @@ from icecream import ic  # type: ignore
 from IPython import embed  # type: ignore
 from model.actor_critic import ActorCritic
 from natsort import natsorted
-from numpy import str0
+# from numpy import str0
 from tester import Tester
 from torch.distributions import Categorical
 from torch.nn.parallel import DistributedDataParallel as DDP
