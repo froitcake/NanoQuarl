@@ -23,18 +23,18 @@ from pathlib import Path
 import hydra
 import qtz
 import torch
-import torch.distributed as dist
-import torch.distributed.rpc as rpc
+# import torch.distributed as dist
+# import torch.distributed.rpc as rpc
 import torch.multiprocessing as mp
 import wandb
-from omegaconf import OmegaConf, DictConfig
-from torch.cuda.amp import autocast, GradScaler
+from omegaconf import OmegaConf
+from torch.cuda.amp import GradScaler
 
 # Import original PPO components
-from ppo import PPOMod, BaseConfig, TestConfig, ConvertConfig
+from ppo import PPOMod, BaseConfig
 from actor import PPOAgent
 from model.nano_actor_critic import NanoActorCritic  # Our new nano model
-from tqdm import tqdm
+# from tqdm import tqdm
 
 # Add current directory to path for imports
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
