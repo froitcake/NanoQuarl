@@ -21,7 +21,7 @@ from typing import Dict, List, Optional, OrderedDict, cast
 from pathlib import Path
 
 import hydra
-import qtz
+import qtz_wrapper
 import torch
 # import torch.distributed as dist
 # import torch.distributed.rpc as rpc
@@ -196,7 +196,7 @@ class NanoPPOMod(PPOMod):
                 gnn_output_dim=getattr(self.cfg, 'gnn_output_dim', 32),
                 actor_hidden_size=getattr(self.cfg, 'actor_hidden_size', 64),
                 critic_hidden_size=getattr(self.cfg, 'critic_hidden_size', 32),
-                action_dim=qtz.quartz_context.num_xfers,
+                action_dim=qtz_wrapper.quartz_context.num_xfers,
                 device=self.device,
             ).to(self.device)
         else:
