@@ -694,7 +694,7 @@ class PPOMod:
             printfl(f'saved "{out_path}"!')
 
 
-@hydra.main(config_path='config', config_name='config')
+@hydra.main(version_base=None, config_path='config', config_name='config')
 def main(config: Config) -> None:
     output_dir = os.path.abspath(os.curdir)  # get hydra output dir
     os.chdir(hydra.utils.get_original_cwd())  # set working dir to the original one
