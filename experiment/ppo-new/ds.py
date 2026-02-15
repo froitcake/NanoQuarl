@@ -12,7 +12,7 @@ from dataclasses import dataclass, fields
 from typing import Any, Dict, Iterator, List, Set, Tuple, TypeVar, cast
 
 import dgl  # type: ignore
-import qtz
+import quartz_wrapper as qtz
 import torch
 from IPython import embed  # type: ignore
 from sortedcontainers import SortedDict  # type: ignore
@@ -26,8 +26,8 @@ class Action:
     node: int
     xfer: int
 
-    def to_tensor(self) -> torch.LongTensor:
-        return torch.LongTensor([self.node, self.xfer])
+    def to_tensor(self) -> torch.Tensor:
+        return torch.tensor([self.node, self.xfer], dtype=torch.long)
 
 
 @dataclass
@@ -39,10 +39,10 @@ class ActionTmp:
 
 @dataclass
 class Experience:
-    state: quartz.PyGraph
+    state: quartz.Graph
     action: Action
     reward: float
-    next_state: quartz.PyGraph
+    next_state: quartz.Graph
     game_over: bool
     node_value: float
     next_nodes: List[int]
@@ -177,12 +177,12 @@ class ExperienceList:
             exps.state = dgl.batch(self.state[sc]).to(device)
             exps.next_state = dgl.batch(self.next_state[sc]).to(device)
             exps.action = torch.stack([a.to_tensor() for a in self.action[sc]]).to(device)  # type: ignore
-            exps.reward = torch.Tensor(self.reward[sc]).to(device)
-            exps.game_over = torch.BoolTensor(self.game_over[sc]).to(device)  # type: ignore
-            exps.node_value = torch.Tensor(self.node_value[sc]).to(device)
-            exps.next_nodes = [torch.LongTensor(ns).to(device) for ns in self.next_nodes[sc]]  # type: ignore
+            exps.reward = torch.tensor(self.reward[sc], dtype=torch.float32, device=device)
+            exps.game_over = torch.tensor(self.game_over[sc], dtype=torch.bool, device=device)  # type: ignore
+            exps.node_value = torch.tensor(self.node_value[sc], dtype=torch.float32, device=device)
+            exps.next_nodes = [torch.tensor(ns, dtype=torch.long, device=device) for ns in self.next_nodes[sc]]  # type: ignore
             exps.xfer_mask = torch.stack(self.xfer_mask[sc]).to(device)  # type: ignore
-            exps.xfer_logprob = torch.Tensor(self.xfer_logprob[sc]).to(device)
+            exps.xfer_logprob = torch.tensor(self.xfer_logprob[sc], dtype=torch.float32, device=device)
 
         return exps
 
@@ -237,14 +237,14 @@ class TrainExpList(ExperienceList):
             exps.state = dgl.batch(self.state[sc]).to(device)
             exps.next_state = dgl.batch(self.next_state[sc]).to(device)
             exps.action = torch.stack([a.to_tensor() for a in self.action[sc]]).to(device)  # type: ignore
-            exps.reward = torch.Tensor(self.reward[sc]).to(device)
-            exps.game_over = torch.BoolTensor(self.game_over[sc]).to(device)  # type: ignore
-            exps.node_value = torch.Tensor(self.node_value[sc]).to(device)
-            exps.next_nodes = [torch.LongTensor(ns).to(device) for ns in self.next_nodes[sc]]  # type: ignore
+            exps.reward = torch.tensor(self.reward[sc], dtype=torch.float32, device=device)
+            exps.game_over = torch.tensor(self.game_over[sc], dtype=torch.bool, device=device)  # type: ignore
+            exps.node_value = torch.tensor(self.node_value[sc], dtype=torch.float32, device=device)
+            exps.next_nodes = [torch.tensor(ns, dtype=torch.long, device=device) for ns in self.next_nodes[sc]]  # type: ignore
             exps.xfer_mask = torch.stack(self.xfer_mask[sc]).to(device)  # type: ignore
-            exps.xfer_logprob = torch.Tensor(self.xfer_logprob[sc]).to(device)
-            exps.target_values = torch.Tensor(self.target_values[sc]).to(device)
-            exps.advantages = torch.Tensor(self.advantages[sc]).to(device)
+            exps.xfer_logprob = torch.tensor(self.xfer_logprob[sc], dtype=torch.float32, device=device)
+            exps.target_values = torch.tensor(self.target_values[sc], dtype=torch.float32, device=device)
+            exps.advantages = torch.tensor(self.advantages[sc], dtype=torch.float32, device=device)
         return exps
 
 
@@ -323,7 +323,7 @@ class ExperienceListIterator:
 class AllGraphDictValue:
     dist: int
     cost: int
-    pre_graph: quartz.PyGraph
+    pre_graph: quartz.Graph
     action: Action
 
 
@@ -347,7 +347,7 @@ class GraphBuffer:
         self.original_cost = get_cost(self.original_graph, self.cost_type)
         self.vmem_perct_limit = vmem_perct_limit
 
-        self.cost_to_graph: SortedDict[int, List[quartz.PyGraph]] = SortedDict(
+        self.cost_to_graph: SortedDict[int, List[quartz.Graph]] = SortedDict(
             {
                 get_cost(self.original_graph, cost_type): [
                     self.original_graph,
@@ -372,7 +372,7 @@ class GraphBuffer:
         self.init_graph_depths: List[int] = []
         self.graph_depths: List[int] = []
 
-        self.all_graphs: Dict[quartz.PyGraph, AllGraphDictValue] = {
+        self.all_graphs: Dict[quartz.Graph, AllGraphDictValue] = {
             self.original_graph: AllGraphDictValue(
                 0, self.original_cost, None, Action(0, 0)
             ),
@@ -420,13 +420,13 @@ class GraphBuffer:
                 f'Used {vmem_used_perct()} % memory. Exit to avoid system crash.'
             )
 
-    def push_back(self, graph: quartz.PyGraph, hash_value: int = None) -> bool:
+    def push_back(self, graph: quartz.Graph, hash_value: int = None) -> bool:
         if hash_value is None:
             hash_value = hash(graph)
         if hash_value not in self.hashset:
             self.hashset.add(hash_value)
             gcost = get_cost(graph, self.cost_type)
-            graphs: List[quartz.PyGraph]
+            graphs: List[quartz.Graph]
             if gcost not in self.cost_to_graph:
                 graphs = []
                 self.cost_to_graph[gcost] = graphs
@@ -447,7 +447,7 @@ class GraphBuffer:
         else:
             return False
 
-    def pop_one(self, graph_to_remain: quartz.PyGraph = None) -> quartz.PyGraph | None:
+    def pop_one(self, graph_to_remain: quartz.Graph = None) -> quartz.Graph | None:
         if len(self) > 0:
             max_key_idx: int = -1
             while True:
@@ -486,9 +486,9 @@ class GraphBuffer:
                     max_key_idx -= 1
             # end while
 
-    def sample(self, greedy: bool) -> quartz.PyGraph:
+    def sample(self, greedy: bool) -> quartz.Graph:
         gcost_list = list(self.cost_to_graph.keys())
-        gcost = torch.Tensor(gcost_list).to(self.device)
+        gcost = torch.tensor(gcost_list, dtype=torch.float32, device=self.device)
         if greedy:
             weights = 1 / (gcost - gcost.min() + 0.2)
             # weights = (gcost == gcost.min()).float()
@@ -521,13 +521,13 @@ class GraphBuffer:
     #     # end if
     #     return False
 
-    def append_costs_from_graph(self, graph: quartz.PyGraph):
+    def append_costs_from_graph(self, graph: quartz.Graph):
         self.graph_gcs.append(graph.gate_count)
         self.graph_ccs.append(graph.cx_count)
         self.graph_depths.append(graph.depth)
         self.graph_costs.append(get_cost(graph, self.cost_type))
 
-    def append_init_costs_from_graph(self, graph: quartz.PyGraph):
+    def append_init_costs_from_graph(self, graph: quartz.Graph):
         self.init_graph_gcs.append(graph.gate_count)
         self.init_graph_ccs.append(graph.cx_count)
         self.init_graph_depths.append(graph.depth)
@@ -593,9 +593,9 @@ class GraphBuffer:
 
     def push_back_all_graphs(
         self,
-        graph: quartz.PyGraph,
+        graph: quartz.Graph,
         cost: int,
-        pre_graph: quartz.PyGraph,
+        pre_graph: quartz.Graph,
         action: Action,
     ) -> None:
         # assert pre_graph in self.all_graphs
