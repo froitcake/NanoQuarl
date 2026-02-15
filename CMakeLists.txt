@@ -97,7 +97,7 @@ add_library(quartz_runtime SHARED ${QUARTZ_SRCS})
 
 target_compile_features(quartz_runtime PUBLIC cxx_std_17)
 
-target_link_libraries(quartz_runtime ${QUARTZ_LINK_LIBS})
+target_link_libraries(quartz_runtime PUBLIC z3)
 
 target_include_directories(quartz_runtime
         PUBLIC ${PROJECT_SOURCE_DIR}/src)
