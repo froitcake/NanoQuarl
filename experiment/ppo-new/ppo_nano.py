@@ -21,7 +21,7 @@ from typing import Dict, List, Optional, OrderedDict, cast
 from pathlib import Path
 
 import hydra
-import qtz_wrapper
+import quartz_wrapper
 import torch
 # import torch.distributed as dist
 # import torch.distributed.rpc as rpc
