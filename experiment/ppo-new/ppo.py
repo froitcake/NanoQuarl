@@ -12,7 +12,10 @@ from functools import partial
 from typing import Dict, List, Optional, OrderedDict, cast
 
 import hydra
-import qtz
+import quartz_wrapper as qtz
+import sys
+sys.path.insert(0, '../..')
+import quartz  # type: ignore
 import torch
 import torch.distributed as dist
 import torch.distributed.rpc as rpc
@@ -32,8 +35,6 @@ from tqdm import tqdm  # type: ignore
 from utils import *
 
 from config.config import *
-
-# import quartz # type: ignore
 
 
 class PPOMod:
