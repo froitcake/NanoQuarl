@@ -7,9 +7,9 @@ set -e
 echo "🚀 Nano Quarl - IBM Auto-Discovery Training"
 echo "============================================"
 
-# Activate environment
-source ~/mambaforge/etc/profile.d/conda.sh
-conda activate quartz
+# # Activate environment
+# source ~/mambaforge/etc/profile.d/conda.sh
+# conda activate quartz
 
 # Jetson optimizations
 export CUDA_VISIBLE_DEVICES=0
