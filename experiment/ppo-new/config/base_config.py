@@ -49,7 +49,7 @@ class BaseConfig:
     omp_num_threads: int = 4
 
     seed: int = 23333
-    wandb: WandbConfig = WandbConfig()
+    wandb: WandbConfig = field(default_factory=WandbConfig)
 
     # quartz
     gate_set: List[str] = field(
