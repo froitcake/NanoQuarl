@@ -8,7 +8,7 @@ import os
 from typing import Dict, List, Optional
 
 import hydra
-import qtz
+import quartz_wrapper as qtz
 import torch
 import wandb
 from ds import *
@@ -293,9 +293,9 @@ class Tester:
         b_circs: dgl.DGLGraph = dgl.batch(
             [circuit.to_dgl_graph() for circuit in cur_circs]
         ).to(self.device)
-        num_nodes: torch.LongTensor = (
+        num_nodes: torch.Tensor = (
             b_circs.batch_num_nodes()
-        )  # (num_graphs, ) assert each elem > 0
+        )  # (num_graphs, ) assert each elem > 0, dtype=long
         # (batch_num_nodes, embed_dim)
         b_node_embeds: torch.Tensor = self.ac_net.gnn(b_circs)
         # (batch_num_nodes, )
@@ -366,8 +366,8 @@ class Tester:
         """sample action_xfer with mask"""
         av_xfer_masks = torch.zeros_like(
             xfer_logits, dtype=torch.bool
-        )  # device is the same with xfer_logits
-        av_xfer_masks = cast(torch.BoolTensor, av_xfer_masks)
+        )  # device is the same with xfer_logits, dtype=bool
+        av_xfer_masks = cast(torch.Tensor, av_xfer_masks)
         for i_circ, circ in enumerate(cur_circs):
             circ = cur_circs[i_circ]
             av_xfers = circ.available_xfers_parallel(
