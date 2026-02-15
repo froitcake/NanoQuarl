@@ -1,0 +1,68 @@
+defaults:
+  - config # Inherit from base config
+  - _self_
+
+c:
+  # ============ NANO MODE FLAGS ============
+  use_nano_model: true # Use nano architecture
+  auto_discover_circuits: true # Auto-load from directory
+
+  # ============ CIRCUIT AUTO-DISCOVERY ============
+  circuits_dir: "../circs/ibm_circs" # Relative to ppo-new/
+  max_circuits: 15 # Limit for Jetson Nano
+
+  # input_graphs will be populated automatically
+  # (can still specify manually if auto_discover_circuits: false)
+
+  # ============ IBM GATE SET ============
+  gate_set: "ibm"
+  ecc_file: "../../eccset/ibm_complete_ecc_set.json"
+  num_gate_types: 25
+
+  # ============ NANO MODEL ARCHITECTURE ============
+  gnn_num_layers: 5 # Minimum from paper
+  gnn_hidden_dim: 40 # Adjusted for IBM
+  gnn_output_dim: 40
+  gate_type_embed_dim: 40
+  actor_hidden_size: 80
+  critic_hidden_size: 40
+
+  # ============ TRAINING ============
+  mode: "train"
+  num_iters: 150
+  num_eps_per_iter: 12
+  max_eps_len: 250
+  min_eps_len: 50
+
+  # Batch settings
+  batch_size: 48
+  num_epochs: 5
+
+  # NANO OPTIMIZATIONS
+  use_amp: true # Mixed precision
+  grad_accum_steps: 6 # Gradient accumulation
+
+  # ============ OPTIMIZER ============
+  lr_gnn: 3e-4
+  lr_actor: 3e-4
+  lr_critic: 5e-4
+  lr_scheduler: "cosine"
+
+  # ============ HARDWARE (JETSON NANO) ============
+  gpus: [0]
+  omp_num_threads: 4
+  batch_inference: false
+  vmem_perct_limit: 0.75
+
+  # ============ CHECKPOINTING ============
+  save_interval: 25
+  resume: false
+  # ckpt_path: 'ckpts/ibm_iter_921_6l.pt'  # Uncomment to fine-tune
+  # load_non_ddp_ckpt: true
+
+  # ============ LOGGING ============
+  wandb:
+    en: true
+    offline: false
+    project: "nano-quarl-ibm-jetson"
+    run_name: "ibm_auto_5layer"
